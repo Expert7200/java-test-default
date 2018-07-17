@@ -21,7 +21,7 @@ import javax.validation.constraints.Size;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
-import com.etnetera.hr.UniqueList;
+import com.etnetera.hr.utils.UniqueList;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 /**
@@ -191,7 +191,6 @@ public class JavaScriptFramework {
 		return true;
 	}
 
-	// TODO
 	@Override
 	public String toString() {
 		return "JavaScriptFramework [id=" + id + ", name=" + name + "]";

@@ -20,5 +20,5 @@ public class AppConfig {
 	public ApiService apiService(@Autowired JavaScriptFrameworkRepository repository) {
 		return new ApiService(repository);
 	}
-
+	
 }

@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
  *
  */
 @Entity
-@Table(name="Version")
+@Table(name = "Version")
 public class JavaScriptFrameworkVersion {
 
 	private Long id;
@@ -36,14 +36,14 @@ public class JavaScriptFrameworkVersion {
 	public JavaScriptFrameworkVersion(@NotNull String version) {
 		this.setVersion(version);
 	}
-	
+
 	public JavaScriptFrameworkVersion(Long id, @NotNull String version) {
 		this.setId(id);
 		this.setVersion(version);
 	}
-	
+
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "version_id")
 	public Long getId() {
 		return id;
@@ -52,9 +52,9 @@ public class JavaScriptFrameworkVersion {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	
+
 	@NotBlank(message = "Version can't be blank or null")
-	@Size(max=10, message = "Version shouldn't be longer than 10 symbols")
+	@Size(max = 10, message = "Version shouldn't be longer than 10 symbols")
 	@Column(nullable = false, length = 10)
 	public String getVersion() {
 		return version;
@@ -63,9 +63,9 @@ public class JavaScriptFrameworkVersion {
 	public void setVersion(@NotNull String version) {
 		this.version = version;
 	}
-	
+
 	@JsonBackReference
-	@ManyToOne(optional=false)
+	@ManyToOne(optional = false)
 	@JoinColumn(name = "framework_id", nullable = false)
 	public JavaScriptFramework getFramework() {
 		return framework;
@@ -73,9 +73,6 @@ public class JavaScriptFrameworkVersion {
 
 	public void setFramework(@NotNull JavaScriptFramework framework) {
 		this.framework = framework;
-//		if (!framework.getVersionSet().contains(this)) {
-//			framework.addVersion(this);
-//		}
 	}
 
 	@Override
@@ -109,10 +106,10 @@ public class JavaScriptFrameworkVersion {
 		return true;
 	}
 
-	//TODO
 	@Override
 	public String toString() {
-		return "JavaScriptFrameworkVersion [id=" + id + ", framework=" + framework + ", version=" + version + "]";
+		return "JavaScriptFrameworkVersion [id=" + id + ", framework=" + framework.getId() + ", version=" + version
+				+ "]";
 	}
 
 }

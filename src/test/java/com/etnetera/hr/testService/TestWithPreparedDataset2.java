@@ -46,8 +46,10 @@ public class TestWithPreparedDataset2 {
 	/**
 	 * Resets auto increment value for given column in given table.
 	 * 
-	 * @param tableName name of the table in String format
-	 * @param columnName name of the column in String format
+	 * @param tableName
+	 *            name of the table in String format
+	 * @param columnName
+	 *            name of the column in String format
 	 */
 	private void resetSequence(String tableName, String columnName) {
 		entityManager.createNativeQuery("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " RESTART WITH 1")
@@ -55,12 +57,16 @@ public class TestWithPreparedDataset2 {
 	}
 
 	/**
-	 * Creates instance of JavaScriptFramework class with given parameters 
+	 * Creates instance of JavaScriptFramework class with given parameters
 	 * 
-	 * @param name name of framework in String format
-	 * @param hypeLevel hype level of framework in Integer format
-	 * @param deprecationDate deprecation date of framework in LocalDate format
-	 * @param versionArgs arguments in String format for versions of framework
+	 * @param name
+	 *            name of framework in String format
+	 * @param hypeLevel
+	 *            hype level of framework in Integer format
+	 * @param deprecationDate
+	 *            deprecation date of framework in LocalDate format
+	 * @param versionArgs
+	 *            arguments in String format for versions of framework
 	 * @return returns created instance of JavaScriptFramework
 	 */
 	public JavaScriptFramework createFramework(@NotNull String name, Integer hypeLevel, LocalDate deprecationDate,

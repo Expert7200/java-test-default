@@ -13,6 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,8 +47,12 @@ public class JavaScriptFrameworkTests extends TestWithPreparedDataset {
 
 	private ObjectMapper mapper = new ObjectMapper();
 
+	private Logger log = LoggerFactory.getLogger(getClass());
+
 	@Test
 	public void getFrameworkByIdTest() throws Exception {
+		log.debug("Test endpoint: GET:/frameworks/{id}");
+		log.debug("Test case: Framework with given ID exists");
 		mockMvc.perform(get("/frameworks/1")).andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andExpect(jsonPath("$.id", is(1)))
 				.andExpect(jsonPath("$.name", is("ReactJS"))).andExpect(jsonPath("$.hypeLevel", is(90)))
@@ -58,11 +64,13 @@ public class JavaScriptFrameworkTests extends TestWithPreparedDataset {
 				.andExpect(jsonPath("$.versions[?(@.id == 4)].version", hasItems("0.8-stable")))
 				.andExpect(jsonPath("$.versions[?(@.id == 5)].version", hasItems("0.9-stable")));
 
+		log.debug("Test case: Framework with given ID does not exist");
 		mockMvc.perform(get("/frameworks/99")).andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void getFrameworksTest() throws Exception {
+		log.debug("Test endpoint: GET:/frameworks");
 		mockMvc.perform(get("/frameworks")).andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andExpect(jsonPath("$", hasSize(5)))
 				.andExpect(jsonPath("$[0].id", is(1))).andExpect(jsonPath("$[0].name", is("ReactJS")))
@@ -100,6 +108,8 @@ public class JavaScriptFrameworkTests extends TestWithPreparedDataset {
 
 	@Test
 	public void getFrameworksByParamsTest() throws Exception {
+		log.debug("Test endpoint: GET:/frameworks/params");
+		log.debug("Test case: Framework with given name exists");
 		mockMvc.perform(get("/frameworks/params?name=Angular.js")).andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andExpect(jsonPath("$[0].id", is(3)))
 				.andExpect(jsonPath("$[0].name", is("Angular.js")))
@@ -108,19 +118,25 @@ public class JavaScriptFrameworkTests extends TestWithPreparedDataset {
 				.andExpect(jsonPath("$[0].versions[?(@.id == 9)].version", hasItems("v1.7.x")))
 				.andExpect(jsonPath("$[0].versions[?(@.id == 10)].version", hasItems("v1.6.x")));
 
+		log.debug("Test case: Framework with given name does not exist");
 		mockMvc.perform(get("/frameworks/params?name=NotExistingFramework")).andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8)).andExpect(jsonPath("$", hasSize(0)));
 	}
 
 	@Test
 	public void deleteFrameworkByIdTest() throws Exception {
+		log.debug("Test endpoint: DELETE:/frameworks/{id}");
+		log.debug("Test case: Framework with given ID exists");
 		mockMvc.perform(delete("/frameworks/1")).andExpect(status().isNoContent());
 
+		log.debug("Test case: Framework with given ID does not exist");
 		mockMvc.perform(delete("/frameworks/99")).andExpect(status().isNotFound());
 	}
 
 	@Test
 	public void createOrUpdateFrameworkTest() throws Exception {
+		log.debug("Test endpoint: PUT:/frameworks");
+		log.debug("Test case: Framework with given ID does not exist (create). New Framework has 2 versions");
 		JavaScriptFramework frameworkWithVersions = createFramework("testFramework", 66, null, "ver 1", "ver 2");
 		mockMvc.perform(put("/frameworks").contentType(MediaType.APPLICATION_JSON)
 				.content(mapper.writeValueAsBytes(frameworkWithVersions))).andExpect(status().isCreated())
@@ -130,20 +146,19 @@ public class JavaScriptFrameworkTests extends TestWithPreparedDataset {
 				.andExpect(jsonPath("$.versions[?(@.id == 12)].version", hasItems("ver 1")))
 				.andExpect(jsonPath("$.versions[?(@.id == 13)].version", hasItems("ver 2")));
 
+		log.debug("Test case: Framework with given ID exists (update). New Framework does not have versions");
 		frameworkWithVersions.setId(6L);
 		frameworkWithVersions.setName("changedFramework");
 		frameworkWithVersions.setHypeLevel(1);
 		frameworkWithVersions.deleteVersion(frameworkWithVersions.getVersions().iterator().next());
-		JavaScriptFrameworkVersion changedVersion = frameworkWithVersions.getVersions().iterator().next();
-		changedVersion.setVersion("ver 11");
-		changedVersion.setId(13L);
+		frameworkWithVersions.deleteVersion(frameworkWithVersions.getVersions().iterator().next());
 		mockMvc.perform(put("/frameworks").contentType(MediaType.APPLICATION_JSON)
 				.content(mapper.writeValueAsBytes(frameworkWithVersions))).andExpect(status().isCreated())
 				.andExpect(jsonPath("$.id", is(6))).andExpect(jsonPath("$.name", is("changedFramework")))
 				.andExpect(jsonPath("$.deprecationDate", equalTo(null))).andExpect(jsonPath("$.hypeLevel", is(1)))
-				.andExpect(jsonPath("$.versions", hasSize(1)))
-				.andExpect(jsonPath("$.versions[?(@.id == 13)].version", hasItems("ver 11")));
+				.andExpect(jsonPath("$.versions", hasSize(0)));
 
+		log.debug("Test case: Framework with given ID does not exist (create). New Framework does not have versions");
 		JavaScriptFramework frameworkWithoutVersions = createFramework("testFramework2", 44, null);
 		mockMvc.perform(put("/frameworks").contentType(MediaType.APPLICATION_JSON)
 				.content(mapper.writeValueAsBytes(frameworkWithoutVersions))).andExpect(status().isCreated())
@@ -151,6 +166,7 @@ public class JavaScriptFrameworkTests extends TestWithPreparedDataset {
 				.andExpect(jsonPath("$.deprecationDate", equalTo(null))).andExpect(jsonPath("$.hypeLevel", is(44)))
 				.andExpect(jsonPath("$.versions", hasSize(0)));
 
+		log.debug("Test case: Framework with given ID exists (update). New Framework has 3 versions");
 		frameworkWithoutVersions.setId(7L);
 		frameworkWithoutVersions.setName("changedFramework2");
 		frameworkWithoutVersions.setHypeLevel(2);
@@ -166,11 +182,14 @@ public class JavaScriptFrameworkTests extends TestWithPreparedDataset {
 				.andExpect(jsonPath("$.versions[?(@.id == 15)].version", hasItems("ver 1")))
 				.andExpect(jsonPath("$.versions[?(@.id == 16)].version", hasItems("ver 2")));
 
+		log.debug("Test case: null body");
 		mockMvc.perform(put("/frameworks").contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
 	}
 
 	@Test
 	public void addFrameworkInvalidTest() throws JsonProcessingException, Exception {
+		log.debug("Test endpoint: PUT:/frameworks");
+		log.debug("Test case: New Framework's name is null");
 		JavaScriptFramework framework = new JavaScriptFramework();
 		mockMvc.perform(
 				put("/frameworks").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(framework)))
@@ -178,6 +197,16 @@ public class JavaScriptFrameworkTests extends TestWithPreparedDataset {
 				.andExpect(jsonPath("$.errors[0].field", is("name")))
 				.andExpect(jsonPath("$.errors[0].message", is("NotBlank")));
 
+		log.debug("Test case: New Framework's name is null");
+		framework.setName("");
+		;
+		mockMvc.perform(
+				put("/frameworks").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(framework)))
+				.andExpect(status().isBadRequest()).andExpect(jsonPath("$.errors", hasSize(1)))
+				.andExpect(jsonPath("$.errors[0].field", is("name")))
+				.andExpect(jsonPath("$.errors[0].message", is("NotBlank")));
+
+		log.debug("Test case: New Framework's name is too long");
 		framework.setName("verylongnameofthejavascriptframeworkjavaisthebestintheworld");
 		mockMvc.perform(
 				put("/frameworks").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(framework)))
@@ -185,6 +214,7 @@ public class JavaScriptFrameworkTests extends TestWithPreparedDataset {
 				.andExpect(jsonPath("$.errors[0].field", is("name")))
 				.andExpect(jsonPath("$.errors[0].message", is("Size")));
 
+		log.debug("Test case: New Framework's hypeLevel is less than minimum");
 		framework.setName("ReactJS");
 		framework.setHypeLevel(-10);
 		mockMvc.perform(
@@ -193,6 +223,7 @@ public class JavaScriptFrameworkTests extends TestWithPreparedDataset {
 				.andExpect(jsonPath("$.errors[0].field", is("hypeLevel")))
 				.andExpect(jsonPath("$.errors[0].message", is("Min")));
 
+		log.debug("Test case: New Framework's hypeLevel is more than maximum");
 		framework.setHypeLevel(101);
 		mockMvc.perform(
 				put("/frameworks").contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsBytes(framework)))

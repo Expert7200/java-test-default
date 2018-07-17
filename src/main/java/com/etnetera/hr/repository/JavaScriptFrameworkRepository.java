@@ -13,7 +13,7 @@ import com.etnetera.hr.data.JavaScriptFramework;
  */
 @Repository
 public interface JavaScriptFrameworkRepository extends CrudRepository<JavaScriptFramework, Long> {
-	
+
 	Iterable<JavaScriptFramework> findAllByOrderByIdAsc();
 
 }
